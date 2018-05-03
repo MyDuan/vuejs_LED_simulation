@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="styles.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/vue"></script>
+    <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script-->
+    <title>
+        LED Matrix Simulator
+    </title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+
+</head>
+
+<body>
+  <div id = "vue-app">
+    <div style="text-align:center">
+        <h3>
+				LED Matrix Simulator
+			  </h3>Click or click and drag across the LEDs to light them (Dragging wont work on mobile) - <a v-bind:href="website" target="_blank">Fork on Github</a>
+        <br>
+        <form v-on:submit="doSubmit">
+            Width:
+            <input v-model="width_s" size="2" type="text"/>
+            Height:
+            <input v-model="height_s" size="2" type="text"/>
+            <button type="submit">Submit</button>
+        </form>
+        <br>
+        <button v-on:click="Clear">Clear Lit LEDs</button> |
+        <button v-on:click="ClearFrames()">Clear Saved Frames</button>
+        <!--input type="button" onclick="" value="Clear Lit LEDs"></input> |
+        <input type="button" onclick="" value="Clear Saved Frames"> </input-->
+
+        <br>
+        <br>
+        <button type="button" v-on:click="FrameSave">Frame Save</button>
+        <!--input type="button" id="b2" onclick="FrameSave()" value="Frame Save"> </input--> |
+        <!--input id="framenum" name="frame" type="number" value=""-->
+        <input id="framenum" name="w" size="2" type="text" v-model="framenum_index"/>
+        <button v-on:click="FrameUpdate()">Frame Update</button>
+        <!--input type="button" id="b2" onclick="FrameUpdate(document.getElementById('framenum').value)" value="Frame Update"> </input--> |
+        <button v-on:click="FramesPlay" value="">Play Saved Frames</button>
+        <!--input type="button" onclick="FramesPlay()" value="Play Saved Frames"> </input--> |
+        <button v-on:click="FramesStop" value="">Stop Playing</button>
+        <!--input type="button" onclick="FramesStop()" value="Stop Playing"> </input-->
+        <br>
+        <br>
+        <div id="grid">
+          <ul v-for="num1 in height">
+            <button class='point' v-for="num in width" v-bind:id = "getId(num, num1)" v-on:click="light"></button>
+            <!--button class='point' v-for="num in width" v-bind:id = "getId(num, num1)" v-bind:class="{lit:isActive}" v-on:click="light"></button-->
+          </ul>
+        </div>
+        <br> Enter Frame:
+        <!--input id="framenumber" name="frame" type="number" value=""-->
+        <input id="framenumber" name="frame" type="number" v-model="framenumber"/>
+        <button v-on:click="Clear_FrameLoad(framenumber)" value="">Load</button>
+        <!--input type="button" value="Load" onclick="Clear(); FrameLoad(document.getElementById('framenumber').value)"--> Animation Speed (In ms):
+        <input id="framespeed" name="frspeed" type="number" v-model="framespeed"/>
+        <!--input id="framespeed" name="frspeed" type="number" value="350"--> Loop:
+        <input type="checkbox" id="floop" v-model="checked">
+        <!--input type="checkbox" id="floop" checked-->
+        <br>
+        <div id="frames"></div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+
+    <!--
+
+        var FrameNum = 0
+        var FrameArr = [0];
+
+        function FrameSave() {
+            FrameNum++;
+            var className = document.getElementsByClassName('lit');
+            var classnameCount = className.length;
+            var IdStore = new Array();
+            for (var j = 0; j < classnameCount; j++) {
+                IdStore.push(className[j].id);
+            }
+            var json_str = JSON.stringify(IdStore);
+            localStorage.setItem('LMS_FR' + FrameNum, json_str);
+            Frame(FrameNum);
+            Frame();
+        }
+
+        function FrameUpdate(frame) {
+            var className = document.getElementsByClassName('lit');
+            var classnameCount = className.length;
+            var IdStore = new Array();
+            for (var j = 0; j < classnameCount; j++) {
+                IdStore.push(className[j].id);
+            }
+            var json_str = JSON.stringify(IdStore);
+			alert(json_str);
+            localStorage.setItem('LMS_FR' + frame, json_str);
+        }
+
+        function ClearFrames() {
+            var r = confirm("Are you sure you want to delete all saved frames?");
+            if (r == true) {
+                document.getElementById('frames').innerHTML = "Frames: 0";
+                FrameNum = 0
+                FrameArr = [0];
+                localStorage.clear();
+            } else {
+
+            }
+        }
+
+        function Frame(variable) {
+            if (typeof variable !== 'undefined') {
+                FrameArr.push(variable);
+                var json_str2 = JSON.stringify(FrameArr);
+                localStorage.setItem('LMS_FRAMES', json_str2);
+            } else {
+                if (localStorage.getItem('LMS_FRAMES') === null) {
+                    document.getElementById('frames').innerHTML = "Frames: 0"
+                } else {
+                    frames = localStorage.getItem('LMS_FRAMES');
+                    document.getElementById('frames').innerHTML = "";
+                    framesp = JSON.parse(frames)
+                    document.getElementById('frames').innerHTML = "Frames: " + Math.max(...framesp);
+                }
+
+            }
+        }
+
+        var FTimeout;
+        var FTimeout2;
+
+        function FramesPlay() {
+            framespeed = document.getElementById('framespeed').value;
+            floop = document.getElementById("floop");
+            if (localStorage.getItem('LMS_FRAMES') === null) {
+
+            } else {
+                frames = localStorage.getItem('LMS_FRAMES');
+                framesp = JSON.parse(frames);
+                var i = 1, howManyTimes = Math.max(...framesp) + 1;
+
+                function f() {
+                    Clear();
+                    LitLed = localStorage.getItem('LMS_FR' + i);
+                    LitLedJS = JSON.parse(LitLed)
+                    LitLedJS.forEach(function(element) {
+                        document.getElementById(element).classList.add('lit');
+                    });
+                    i++;
+                    if (i < howManyTimes) {
+                        FTimeout = setTimeout(f, framespeed);
+                    }
+                }
+                f();
+
+                if (floop.checked) {
+                    FTimeout2 = setTimeout(FramesPlay, 2000);
+                }
+            }
+        }
+
+        function FramesStop() {
+            clearTimeout(FTimeout);
+            clearTimeout(FTimeout2);
+        }
+
+        function FrameLoad(frame) {
+            LitLed = localStorage.getItem('LMS_FR' + frame);
+            LitLedJS = JSON.parse(LitLed)
+            LitLedJS.forEach(function(element) {
+                document.getElementById(element).classList.add('lit');
+            });
+        }
+
+        window.onload = Frame();
+    </script-->
+</body>
+
+</html>

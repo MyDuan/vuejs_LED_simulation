@@ -1,0 +1,50 @@
+body {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.point {
+    height: 25px;
+    width: 25px;
+    background-color: #ffffff80;
+    border-radius: 50%;
+    display: inline-block;
+    border-style: none;
+    margin: 2px;
+}
+
+.point:focus {
+    outline: 0;
+}
+
+.lit {
+    background-color: #ff0000;
+}
+
+a:visited {
+    color: green;
+}
+
+a:link {
+    color: red;
+}
+
+#framenumber {
+    width: 40px;
+}
+
+#framenum {
+    width: 40px;
+}
+
+#framespeed {
+    width: 60px;
+}
+
+#wh {
+    margin-top: 10px;
+}
+
+#frames {
+    margin-top: 5px;
+}
